@@ -38,21 +38,21 @@ import java.util.Random;
 /**
  * A fragment representing a list of Items.
  */
-public class ShoppingListFragment extends Fragment {
+public class UsersFragment extends Fragment {
 
     private static final String TAG = "ResultsHistoryFragment";
 
     private ListView listView;
 
     //private QuizHistoryData quizHistoryData = null;
-    private List<ShoppingItem> quizResultList;
-    ListArrayAdapter itemsAdapter;
+    private List<Roommate> quizResultList;
+    RoommatesArrayAdapter itemsAdapter;
     private int versionNum;
 
     /*
      * required empty public constructor
      */
-    public ShoppingListFragment() {
+    public UsersFragment() {
         // Required empty public constructor
     }
 
@@ -62,17 +62,6 @@ public class ShoppingListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
-
-    public static ShoppingListFragment newInstance() {
-
-        ShoppingListFragment fragment = new ShoppingListFragment();
-
-        Bundle args = new Bundle();
-        //args.putInt( "index", index );
-        fragment.setArguments( args );
-
-        return fragment;
     }
 
     /*
@@ -95,11 +84,11 @@ public class ShoppingListFragment extends Fragment {
 
         listView = getView().findViewById(R.id.listView);
         //quizHistoryData = new QuizHistoryData(getActivity());
-        quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
-        quizResultList.add(new ShoppingItem("Ducky", 3));
-        quizResultList.add(new ShoppingItem("Candy", 200));
-        quizResultList.add(new ShoppingItem("Ga", 3));
-        itemsAdapter = new ListArrayAdapter( getActivity(), quizResultList );
+        quizResultList = new ArrayList<Roommate>(); //QuizHistoryData.quizHistory;
+        quizResultList.add(new Roommate("Mumu", "mumu@gmail.com", "1112223333"));
+        quizResultList.add(new Roommate("Paco", "paco@gmail.com", "4445556666"));
+        quizResultList.add(new Roommate("Gaga", "gaga@gmail.com", "7778889999"));
+        itemsAdapter = new RoommatesArrayAdapter( getActivity(), quizResultList );
 
         // set headers
         //TextView titleView = view.findViewById( R.id.questionNum );
@@ -114,18 +103,18 @@ public class ShoppingListFragment extends Fragment {
         //Log.d( TAG, "Flow2_A.onResume()"  );
         super.onResume();
         //if( quizHistoryData != null ) {
-          //  quizHistoryData.open();
-            //quizHistoryData.restorelJobLeads();
-            quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
-            //quizHistoryData.retrieveQuizResults();
-            quizResultList.add(new ShoppingItem("Ducky", 3));
-            quizResultList.add(new ShoppingItem("Candy", 200));
-            quizResultList.add(new ShoppingItem("Ga", 3));
+        //  quizHistoryData.open();
+        //quizHistoryData.restorelJobLeads();
+        quizResultList = new ArrayList<Roommate>(); //QuizHistoryData.quizHistory;
+        //quizHistoryData.retrieveQuizResults();
+        quizResultList.add(new Roommate("Mumu", "mumu@gmail.com", "1112223333"));
+        quizResultList.add(new Roommate("Paco", "paco@gmail.com", "4445556666"));
+        quizResultList.add(new Roommate("Gaga", "gaga@gmail.com", "7778889999"));
 
-            Log.d( TAG, "ReviewJobLeadsFragment.onResume(): length: " + quizResultList.size() );
+        Log.d( TAG, "ReviewJobLeadsFragment.onResume(): length: " + quizResultList.size() );
 
-            itemsAdapter = new ListArrayAdapter(getActivity(), quizResultList );
-            listView.setAdapter(itemsAdapter);
+        itemsAdapter = new RoommatesArrayAdapter(getActivity(), quizResultList );
+        listView.setAdapter(itemsAdapter);
         //}
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( getResources().getString( R.string.app_name ) );
     }

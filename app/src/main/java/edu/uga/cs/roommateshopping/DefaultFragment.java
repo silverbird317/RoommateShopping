@@ -38,7 +38,7 @@ import java.util.Random;
 /**
  * A fragment representing a list of Items.
  */
-public class ShoppingListFragment extends Fragment {
+public class DefaultFragment extends Fragment {
 
     private static final String TAG = "ResultsHistoryFragment";
 
@@ -52,7 +52,7 @@ public class ShoppingListFragment extends Fragment {
     /*
      * required empty public constructor
      */
-    public ShoppingListFragment() {
+    public DefaultFragment() {
         // Required empty public constructor
     }
 
@@ -64,17 +64,6 @@ public class ShoppingListFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    public static ShoppingListFragment newInstance() {
-
-        ShoppingListFragment fragment = new ShoppingListFragment();
-
-        Bundle args = new Bundle();
-        //args.putInt( "index", index );
-        fragment.setArguments( args );
-
-        return fragment;
-    }
-
     /*
      * overrides onCreateView
      */
@@ -82,7 +71,7 @@ public class ShoppingListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_shopping_list, container, false);
+        return inflater.inflate(R.layout.fragment_default, container, false);
     }
 
     /*
@@ -92,19 +81,6 @@ public class ShoppingListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState ) {
         //public void onActivityCreated(Bundle savedInstanceState) {
         super.onViewCreated( view, savedInstanceState );
-
-        listView = getView().findViewById(R.id.listView);
-        //quizHistoryData = new QuizHistoryData(getActivity());
-        quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
-        quizResultList.add(new ShoppingItem("Ducky", 3));
-        quizResultList.add(new ShoppingItem("Candy", 200));
-        quizResultList.add(new ShoppingItem("Ga", 3));
-        itemsAdapter = new ListArrayAdapter( getActivity(), quizResultList );
-
-        // set headers
-        //TextView titleView = view.findViewById( R.id.questionNum );
-        //TextView question = view.findViewById( R.id.question );
-
     }
 
     /*
@@ -113,20 +89,6 @@ public class ShoppingListFragment extends Fragment {
     public void onResume() {
         //Log.d( TAG, "Flow2_A.onResume()"  );
         super.onResume();
-        //if( quizHistoryData != null ) {
-          //  quizHistoryData.open();
-            //quizHistoryData.restorelJobLeads();
-            quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
-            //quizHistoryData.retrieveQuizResults();
-            quizResultList.add(new ShoppingItem("Ducky", 3));
-            quizResultList.add(new ShoppingItem("Candy", 200));
-            quizResultList.add(new ShoppingItem("Ga", 3));
-
-            Log.d( TAG, "ReviewJobLeadsFragment.onResume(): length: " + quizResultList.size() );
-
-            itemsAdapter = new ListArrayAdapter(getActivity(), quizResultList );
-            listView.setAdapter(itemsAdapter);
-        //}
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( getResources().getString( R.string.app_name ) );
     }
 }

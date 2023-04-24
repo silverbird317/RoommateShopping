@@ -38,7 +38,7 @@ import java.util.Random;
 /**
  * A fragment representing a list of Items.
  */
-public class ShoppingListFragment extends Fragment {
+public class AlreadyBoughtListFragment extends Fragment {
 
     private static final String TAG = "ResultsHistoryFragment";
 
@@ -54,7 +54,7 @@ public class ShoppingListFragment extends Fragment {
     /*
      * required empty public constructor
      */
-    public ShoppingListFragment() {
+    public AlreadyBoughtListFragment() {
         // Required empty public constructor
     }
 
@@ -66,9 +66,9 @@ public class ShoppingListFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    public static ShoppingListFragment newInstance() {
+    public static AlreadyBoughtListFragment newInstance() {
 
-        ShoppingListFragment fragment = new ShoppingListFragment();
+        AlreadyBoughtListFragment fragment = new AlreadyBoughtListFragment();
 
         Bundle args = new Bundle();
         //args.putInt( "index", index );
@@ -116,18 +116,18 @@ public class ShoppingListFragment extends Fragment {
         //Log.d( TAG, "Flow2_A.onResume()"  );
         super.onResume();
         //if( quizHistoryData != null ) {
-          //  quizHistoryData.open();
-            //quizHistoryData.restorelJobLeads();
-            quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
-            //quizHistoryData.retrieveQuizResults();
-            quizResultList.add(new ShoppingItem("Ducky", 3));
-            quizResultList.add(new ShoppingItem("Candy", 200));
-            quizResultList.add(new ShoppingItem("Ga", 3));
+        //  quizHistoryData.open();
+        //quizHistoryData.restorelJobLeads();
+        quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
+        //quizHistoryData.retrieveQuizResults();
+        quizResultList.add(new ShoppingItem("Ducky", 3));
+        quizResultList.add(new ShoppingItem("Candy", 200));
+        quizResultList.add(new ShoppingItem("Ga", 3));
 
-            Log.d( TAG, "ReviewJobLeadsFragment.onResume(): length: " + quizResultList.size() );
+        Log.d( TAG, "ReviewJobLeadsFragment.onResume(): length: " + quizResultList.size() );
 
-            itemsAdapter = new ListArrayAdapter(getActivity(), quizResultList );
-            listView.setAdapter(itemsAdapter);
+        itemsAdapter = new ListArrayAdapter(getActivity(), quizResultList );
+        listView.setAdapter(itemsAdapter);
         //}
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( getResources().getString( R.string.app_name ) );
     }

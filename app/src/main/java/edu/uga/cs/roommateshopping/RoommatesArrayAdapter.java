@@ -58,13 +58,20 @@ public class RoommatesArrayAdapter extends ArrayAdapter<Roommate> {
         email.setText("" + roommate.getEmail());
         phone.setText(roommate.getPhone());
 
-        Button delete = itemView.findViewById(R.id.button);
-
+        Button delete = itemView.findViewById(R.id.remove);
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(DEBUG_TAG, "Deleting item");
                 //values.remove(position);
+            }
+        });
+
+        Button pay = itemView.findViewById(R.id.pay);
+        pay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(DEBUG_TAG, "Pay up");
             }
         });
 

@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
                 if (fragmentTracker != 0) {
                     fragmentTracker = 0;
                     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                    fragmentTransaction.replace(R.id.shoppingList, ShoppingListFragment.class, null);
+                    fragmentTransaction.replace(R.id.shoppingList, AllListsFragment.class, null);
 
                     fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                     fragmentTransaction.commit();

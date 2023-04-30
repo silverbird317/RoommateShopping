@@ -10,7 +10,7 @@
         android:id="@id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Shopping List"
+        android:text="Already Bought"
         android:textSize="25sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"

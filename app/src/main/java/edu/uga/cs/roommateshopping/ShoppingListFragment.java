@@ -59,11 +59,13 @@ public class ShoppingListFragment extends Fragment {
     public static final String ARG_OBJECT = "object";
 
     //private QuizHistoryData quizHistoryData = null;
-    private List<ShoppingItem> quizResultList;
+    private ArrayList<ShoppingItem> quizResultList = new ArrayList<ShoppingItem>();
     ListArrayAdapter itemsAdapter;
     private int versionNum;
 
     private FirebaseDatabase database;
+
+    private boolean fetched = false;
 
     /*
      * required empty public constructor
@@ -111,10 +113,10 @@ public class ShoppingListFragment extends Fragment {
 
         listView = getView().findViewById(R.id.listView);
         //quizHistoryData = new QuizHistoryData(getActivity());
-        quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
-        quizResultList.add(new ShoppingItem("Ducky", 3));
-        quizResultList.add(new ShoppingItem("Candy", 200));
-        quizResultList.add(new ShoppingItem("Ga", 3));
+        //quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
+        //quizResultList.add(new ShoppingItem("Ducky", 3, "gua"));
+        //quizResultList.add(new ShoppingItem("Candy", 200, "ha"));
+        //quizResultList.add(new ShoppingItem("Ga", 3, "ya"));
         itemsAdapter = new ListArrayAdapter( getActivity(), quizResultList );
 
         // set headers
@@ -134,7 +136,6 @@ public class ShoppingListFragment extends Fragment {
 
 
         // initialize the Job Lead list
-        quizResultList = new ArrayList<ShoppingItem>();
         listView.setAdapter( itemsAdapter );
 
         // get a Firebase DB instance reference
@@ -151,17 +152,21 @@ public class ShoppingListFragment extends Fragment {
 
             @Override
             public void onDataChange( @NonNull DataSnapshot snapshot ) {
+                //quizResultList = new ArrayList<>();
                 // Once we have a DataSnapshot object, we need to iterate over the elements and place them on our job lead list.
                 quizResultList.clear(); // clear the current content; this is inefficient!
-                for( DataSnapshot postSnapshot: snapshot.getChildren() ) {
+                for (DataSnapshot postSnapshot : snapshot.getChildren()) {
                     ShoppingItem jobLead = postSnapshot.getValue(ShoppingItem.class);
-                    jobLead.setKey( postSnapshot.getKey() );
-                    quizResultList.add( jobLead );
-                    Log.d( TAG, "ValueEventListener: added: " + jobLead );
-                    Log.d( TAG, "ValueEventListener: key: " + postSnapshot.getKey() );
+                    jobLead.setKey(postSnapshot.getKey());
+                    Log.d("firebase", "changed: " + jobLead);
+                    quizResultList.add(jobLead);
+                    Log.d(TAG, "ValueEventListener: added: " + jobLead);
+                    Log.d(TAG, "ValueEventListener: key: " + postSnapshot.getKey());
                 }
-
-                Log.d( TAG, "ValueEventListener: notifying recyclerAdapter" );
+                Log.d("new quiz", "" + quizResultList.size());
+                Log.d(TAG, "ValueEventListener: notifying recyclerAdapter");
+                itemsAdapter.clear();
+                itemsAdapter.addAll(quizResultList);
                 itemsAdapter.notifyDataSetChanged();
             }
 
@@ -182,16 +187,17 @@ public class ShoppingListFragment extends Fragment {
         //if( quizHistoryData != null ) {
           //  quizHistoryData.open();
             //quizHistoryData.restorelJobLeads();
-            quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
+            //quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
             //quizHistoryData.retrieveQuizResults();
-            quizResultList.add(new ShoppingItem("Ducky", 3));
-            quizResultList.add(new ShoppingItem("Candy", 200));
-            quizResultList.add(new ShoppingItem("Ga", 3));
+            //quizResultList.add(new ShoppingItem("Ducky", 3, "ya"));
+            //quizResultList.add(new ShoppingItem("Candy", 200, "mu"));
+            //quizResultList.add(new ShoppingItem("Ga", 3, "ha"));
 
             Log.d( TAG, "ReviewJobLeadsFragment.onResume(): length: " + quizResultList.size() );
 
-            itemsAdapter = new ListArrayAdapter(getActivity(), quizResultList );
-            listView.setAdapter(itemsAdapter);
+            //itemsAdapter = new ListArrayAdapter(getActivity(), quizResultList );
+            //listView.setAdapter(itemsAdapter);
+
         //}
 
         getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
@@ -199,6 +205,7 @@ public class ShoppingListFragment extends Fragment {
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
                 // We use a String here, but any type that can be put in a Bundle is supported
                 //String result = bundle.getString("bundleKey");
+                Log.d("receive", "gua");
                 String item = bundle.getString("item");
                 int amount = bundle.getInt("amount");
                 String details = bundle.getString("details");
@@ -216,9 +223,9 @@ public class ShoppingListFragment extends Fragment {
         Log.d("addJobLead", "added");
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("shoppinglist");
+        DatabaseReference myRef = database.getReference("shoppinglist").child(shoppingItem.getItem());
 
-        myRef.push().setValue( shoppingItem )
+        myRef.setValue( shoppingItem )
                 .addOnSuccessListener( new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -231,10 +238,10 @@ public class ShoppingListFragment extends Fragment {
                         } );
 
                         Log.d( TAG, "Job lead saved: " + shoppingItem );
+                        fetched = true;
                         // Show a quick confirmation
                         Toast.makeText(getActivity().getApplicationContext(), "Job lead created for " + shoppingItem.getItem(),
                                 Toast.LENGTH_SHORT).show();
-
                     }
                 })
                 .addOnFailureListener( new OnFailureListener() {

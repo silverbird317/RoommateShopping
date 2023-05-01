@@ -5,19 +5,11 @@ import java.io.Serializable;
 public class ShoppingItem implements Serializable {
 
     private String key;
-    private long cid;
     private String item;
     private int amount;
     private String details;
 
-    /*
-     * public constructor to instantiate item and score
-     */
-    public ShoppingItem(String item, int amount) {
-        this.item = item;
-        this.amount = amount;
-        details = "";
-    }
+    public ShoppingItem() {}
 
     /*
      * public constructor to instantiate item and score and details
@@ -47,7 +39,7 @@ public class ShoppingItem implements Serializable {
     /*
      * item setter
      */
-    public void setItem(String Item)
+    public void setItem(String item)
     {
         this.item = item;
     }
@@ -84,19 +76,5 @@ public class ShoppingItem implements Serializable {
      */
     public String toString() {
         return "Item: " + item + "\nAmount: " + amount + "\nDetails: " + details;
-    }
-
-    /*
-     * cid getter
-     */
-    public long getCid() {
-        return cid;
-    }
-
-    /*
-     * cid setter
-     */
-    public void setCid(long cid) {
-        this.cid = cid;
     }
 }

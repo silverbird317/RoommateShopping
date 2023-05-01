@@ -47,7 +47,7 @@ public class ShoppingBasketFragment extends Fragment {
     public static final String ARG_OBJECT = "object";
 
     //private QuizHistoryData quizHistoryData = null;
-    private List<ShoppingItem> quizResultList;
+    private ArrayList<ShoppingItem> quizResultList;
     ListArrayAdapter itemsAdapter;
     private int versionNum;
 
@@ -98,9 +98,9 @@ public class ShoppingBasketFragment extends Fragment {
         listView = getView().findViewById(R.id.listView);
         //quizHistoryData = new QuizHistoryData(getActivity());
         quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
-        quizResultList.add(new ShoppingItem("Ducky", 3));
-        quizResultList.add(new ShoppingItem("Candy", 200));
-        quizResultList.add(new ShoppingItem("Ga", 3));
+        quizResultList.add(new ShoppingItem("Ducky", 3, "ga"));
+        quizResultList.add(new ShoppingItem("Candy", 200, "yummy"));
+        quizResultList.add(new ShoppingItem("Ga", 3, "7"));
         itemsAdapter = new ListArrayAdapter( getActivity(), quizResultList );
 
         // set headers
@@ -120,9 +120,9 @@ public class ShoppingBasketFragment extends Fragment {
         //quizHistoryData.restorelJobLeads();
         quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
         //quizHistoryData.retrieveQuizResults();
-        quizResultList.add(new ShoppingItem("Ducky", 3));
-        quizResultList.add(new ShoppingItem("Candy", 200));
-        quizResultList.add(new ShoppingItem("Ga", 3));
+        quizResultList.add(new ShoppingItem("Ducky", 3, "gaya"));
+        quizResultList.add(new ShoppingItem("Candy", 200, "chocolate"));
+        quizResultList.add(new ShoppingItem("Ga", 3, "ya"));
 
         Log.d( TAG, "ReviewJobLeadsFragment.onResume(): length: " + quizResultList.size() );
 

@@ -26,10 +26,10 @@ public class ListArrayAdapter extends ArrayAdapter<ShoppingItem> {
     /*
      * public constructor
      */
-    public ListArrayAdapter(Context context, List<ShoppingItem> values) {
+    public ListArrayAdapter(Context context, ArrayList<ShoppingItem> values) {
         super(context, 0, new ArrayList<ShoppingItem>( values ));
         this.context = context;
-        this.values = new ArrayList<ShoppingItem>( values );
+        this.values = values;
         this.originalValues = new ArrayList<ShoppingItem>( values );
         Log.d( DEBUG_TAG, "JobLeadArrayAdapter.values: object: " + values );
         Log.d( DEBUG_TAG, "JobLeadArrayAdapter.originalValues: object: " + originalValues );

@@ -4,9 +4,13 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
 /**
@@ -23,7 +27,6 @@ public class ShoppingListActivity extends AppCompatActivity {
     protected void onCreate( Bundle savedInstanceState ) {
 
         super.onCreate( savedInstanceState );
-
     }
 
     /*

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public class ShoppingItem implements Serializable {
 
+    private String key;
     private long cid;
     private String item;
     private int amount;
@@ -25,6 +26,14 @@ public class ShoppingItem implements Serializable {
         this.item = item;
         this.amount = amount;
         this.details = details;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     /*

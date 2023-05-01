@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
                 if (fragmentTracker != 0) {
                     fragmentTracker = 0;
                     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                    fragmentTransaction.replace(R.id.shoppingList, AllListsFragment.class, null);
+                    fragmentTransaction.replace(R.id.shoppingList, AllListsFragment.class, savedInstanceState, "ShoppingFragment");
 
                     fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                     fragmentTransaction.commit();
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
                 if (fragmentTracker != 1) {
                     fragmentTracker = 1;
                     FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                    fragmentTransaction.replace(R.id.shoppingList, RoommatesFragment.class, null);
+                    fragmentTransaction.replace(R.id.shoppingList, RoommatesFragment.class, savedInstanceState, "Roommate_Fragment");
 
                     fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                     fragmentTransaction.commit();

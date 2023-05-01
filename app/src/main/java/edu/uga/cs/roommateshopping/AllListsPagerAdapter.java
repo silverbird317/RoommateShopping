@@ -19,16 +19,19 @@ public class AllListsPagerAdapter extends FragmentStateAdapter {
         // Return a NEW fragment instance in createFragment(int)
         Fragment fragment = new ShoppingListFragment();
         Bundle args = new Bundle();
+        String tag = "";
         if (position == 0) {
             fragment = new ShoppingListFragment();
             //Bundle args = new Bundle();
             // Our object is just an integer :-P
             args.putInt(ShoppingListFragment.ARG_OBJECT, position + 1);
+            tag = "ShoppingList";
         } else {
             fragment = new AlreadyBoughtListFragment();
             //Bundle args = new Bundle();
             // Our object is just an integer :-P
             args.putInt(AlreadyBoughtListFragment.ARG_OBJECT, position + 1);
+            tag = "AlreadyBought";
         }
         fragment.setArguments(args);
         return fragment;

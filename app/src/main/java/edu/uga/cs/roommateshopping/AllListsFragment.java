@@ -14,12 +14,16 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+/*
+ * fragment that holds shopping list, shopping basket, and list of already purchased items
+ */
 public class AllListsFragment extends Fragment {
-    // When requested, this adapter returns a DemoObjectFragment,
-    // representing an object in the collection.
-    AllListsPagerAdapter demoCollectionAdapter;
+    AllListsPagerAdapter allListsPagerAdapter;
     ViewPager2 viewPager;
 
+    /*
+     * onCreateView override, sets xml layout for fragment
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -27,17 +31,22 @@ public class AllListsFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_all_lists, container, false);
     }
 
+    /*
+     * onViewCreated override, sets up tabs for different lists
+     */
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        demoCollectionAdapter = new AllListsPagerAdapter(this);
+        allListsPagerAdapter = new AllListsPagerAdapter(this);
         viewPager = view.findViewById(R.id.pager);
-        viewPager.setAdapter(demoCollectionAdapter);
+        viewPager.setAdapter(allListsPagerAdapter);
 
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
         new TabLayoutMediator(tabLayout, viewPager,
                 (tab, position) -> {
             if (position == 0) {
                 tab.setText("Shopping List");
+            } else  if (position == 1) {
+              tab.setText("Shopping Basket");
             } else {
                 tab.setText("Already Bought");
             }

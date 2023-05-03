@@ -52,20 +52,19 @@ import java.util.Random;
  */
 public class ShoppingListFragment extends Fragment {
 
-    private static final String TAG = "ResultsHistoryFragment";
+    private static final String TAG = "ShoppingListFragment";
 
     private ListView listView;
 
     public static final String ARG_OBJECT = "object";
 
     //private QuizHistoryData quizHistoryData = null;
-    private ArrayList<ShoppingItem> quizResultList = new ArrayList<ShoppingItem>();
+    private ArrayList<ShoppingItem> shoppingItemList = new ArrayList<ShoppingItem>();
     ListArrayAdapter itemsAdapter;
     private int versionNum;
 
     private FirebaseDatabase database;
-
-    private boolean fetched = false;
+    public static ArrayList<ShoppingItem> toShoppingBasket = new ArrayList<>();
 
     /*
      * required empty public constructor
@@ -112,16 +111,8 @@ public class ShoppingListFragment extends Fragment {
         super.onViewCreated( view, savedInstanceState );
 
         listView = getView().findViewById(R.id.listView);
-        //quizHistoryData = new QuizHistoryData(getActivity());
-        //quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
-        //quizResultList.add(new ShoppingItem("Ducky", 3, "gua"));
-        //quizResultList.add(new ShoppingItem("Candy", 200, "ha"));
-        //quizResultList.add(new ShoppingItem("Ga", 3, "ya"));
-        itemsAdapter = new ListArrayAdapter( getActivity(), quizResultList );
 
-        // set headers
-        //TextView titleView = view.findViewById( R.id.questionNum );
-        //TextView question = view.findViewById( R.id.question );
+        itemsAdapter = new ListArrayAdapter( getActivity(), shoppingItemList );
 
         FloatingActionButton floatingButton = getView().findViewById(R.id.floatingActionButton);
         floatingButton.bringToFront();
@@ -134,39 +125,41 @@ public class ShoppingListFragment extends Fragment {
             }
         });
 
+        Button addToBasket = getView().findViewById(R.id.add);
+        addToBasket.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                for (ShoppingItem item : toShoppingBasket) {
+                    addToShoppingBasket(item);
+                }
+                toShoppingBasket.clear();
+            }
+        });
 
-        // initialize the Job Lead list
+
+        // initialize the list
         listView.setAdapter( itemsAdapter );
 
         // get a Firebase DB instance reference
         database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("shoppinglist");
 
-        // Set up a listener (event handler) to receive a value for the database reference.
-        // This type of listener is called by Firebase once by immediately executing its onDataChange method
-        // and then each time the value at Firebase changes.
-        //
-        // This listener will be invoked asynchronously, hence no need for an AsyncTask class, as in the previous apps
-        // to maintain job leads.
         myRef.addValueEventListener( new ValueEventListener() {
 
             @Override
             public void onDataChange( @NonNull DataSnapshot snapshot ) {
-                //quizResultList = new ArrayList<>();
-                // Once we have a DataSnapshot object, we need to iterate over the elements and place them on our job lead list.
-                quizResultList.clear(); // clear the current content; this is inefficient!
+                shoppingItemList.clear(); // clear the current content; this is inefficient!
                 for (DataSnapshot postSnapshot : snapshot.getChildren()) {
-                    ShoppingItem jobLead = postSnapshot.getValue(ShoppingItem.class);
-                    jobLead.setKey(postSnapshot.getKey());
-                    Log.d("firebase", "changed: " + jobLead);
-                    quizResultList.add(jobLead);
-                    Log.d(TAG, "ValueEventListener: added: " + jobLead);
+                    ShoppingItem shoppingItem = postSnapshot.getValue(ShoppingItem.class);
+                    shoppingItem.setKey(postSnapshot.getKey());
+                    Log.d("firebase", "changed: " + shoppingItem);
+                    shoppingItemList.add(shoppingItem);
+                    Log.d(TAG, "ValueEventListener: added: " + shoppingItem);
                     Log.d(TAG, "ValueEventListener: key: " + postSnapshot.getKey());
                 }
-                Log.d("new quiz", "" + quizResultList.size());
-                Log.d(TAG, "ValueEventListener: notifying recyclerAdapter");
+                Log.d("new quiz", "" + shoppingItemList.size());
                 itemsAdapter.clear();
-                itemsAdapter.addAll(quizResultList);
+                itemsAdapter.addAll(shoppingItemList);
                 itemsAdapter.notifyDataSetChanged();
             }
 
@@ -179,47 +172,31 @@ public class ShoppingListFragment extends Fragment {
     }
 
     /*
-     * overrides onresume, loads quiz results back
+     * overrides onresume
      */
     public void onResume() {
-        //Log.d( TAG, "Flow2_A.onResume()"  );
         super.onResume();
-        //if( quizHistoryData != null ) {
-          //  quizHistoryData.open();
-            //quizHistoryData.restorelJobLeads();
-            //quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
-            //quizHistoryData.retrieveQuizResults();
-            //quizResultList.add(new ShoppingItem("Ducky", 3, "ya"));
-            //quizResultList.add(new ShoppingItem("Candy", 200, "mu"));
-            //quizResultList.add(new ShoppingItem("Ga", 3, "ha"));
-
-            Log.d( TAG, "ReviewJobLeadsFragment.onResume(): length: " + quizResultList.size() );
-
-            //itemsAdapter = new ListArrayAdapter(getActivity(), quizResultList );
-            //listView.setAdapter(itemsAdapter);
-
-        //}
+        Log.d( TAG, "ReviewJobLeadsFragment.onResume(): length: " + shoppingItemList.size() );
 
         getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-                // We use a String here, but any type that can be put in a Bundle is supported
-                //String result = bundle.getString("bundleKey");
                 Log.d("receive", "gua");
                 String item = bundle.getString("item");
                 int amount = bundle.getInt("amount");
-                String details = bundle.getString("details");
-                // Do something with the result
-                ShoppingItem shoppingItem = new ShoppingItem(item, amount, details);
-                addJobLead(shoppingItem);
+                double price = bundle.getDouble("price");
+                ShoppingItem shoppingItem = new ShoppingItem(item, amount, price);
+                addToShoppingList(shoppingItem);
             }
         });
 
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( getResources().getString( R.string.app_name ) );
     }
 
-    // this is our own callback for a AddJobLeadDialogFragment which adds a new job lead.
-    public void addJobLead(ShoppingItem shoppingItem) {
+    /*
+     * adds item to database
+     */
+    public void addToShoppingList(ShoppingItem shoppingItem) {
         Log.d("addJobLead", "added");
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -233,103 +210,59 @@ public class ShoppingListFragment extends Fragment {
                         listView.post( new Runnable() {
                             @Override
                             public void run() {
-                                listView.smoothScrollToPosition( quizResultList.size()-1 );
+                                listView.smoothScrollToPosition( shoppingItemList.size()-1 );
                             }
                         } );
 
-                        Log.d( TAG, "Job lead saved: " + shoppingItem );
-                        fetched = true;
+                        Log.d( TAG, "Item saved: " + shoppingItem );
                         // Show a quick confirmation
-                        Toast.makeText(getActivity().getApplicationContext(), "Job lead created for " + shoppingItem.getItem(),
+                        Toast.makeText(getActivity().getApplicationContext(), "Item created for " + shoppingItem.getItem(),
                                 Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener( new OnFailureListener() {
                     @Override
                     public void onFailure( @NonNull Exception e ) {
-                        Toast.makeText( getActivity().getApplicationContext(), "Failed to create a Job lead for " + shoppingItem.getItem(),
+                        Toast.makeText( getActivity().getApplicationContext(), "Failed to create a Item for " + shoppingItem.getItem(),
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    // This is our own callback for a DialogFragment which edits an existing JobLead.
-    // The edit may be an update or a deletion of this JobLead.
-    // It is called from the EditJobLeadDialogFragment.
-    /*public void updateJobLead( int position, JobLead jobLead, int action ) {
-        if( action == EditJobLeadDialogFragment.SAVE ) {
-            Log.d( DEBUG_TAG, "Updating job lead at: " + position + "(" + jobLead.getCompanyName() + ")" );
+    /*
+     * adds item to shoppingbasket database and removes from shoppinglist database
+     */
+    public void addToShoppingBasket(ShoppingItem shoppingItem) {
+        Log.d("addItem", "added");
 
-            // Update the recycler view to show the changes in the updated job lead in that view
-            recyclerAdapter.notifyItemChanged( position );
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("shoppingbasket").child(shoppingItem.getItem());
 
-            // Update this job lead in Firebase
-            // Note that we are using a specific key (one child in the list)
-            DatabaseReference ref = database
-                    .getReference()
-                    .child( "jobleads" )
-                    .child( jobLead.getKey() );
+        myRef.setValue( shoppingItem )
+                .addOnSuccessListener( new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
 
-            // This listener will be invoked asynchronously, hence no need for an AsyncTask class, as in the previous apps
-            // to maintain job leads.
-            ref.addListenerForSingleValueEvent( new ValueEventListener() {
-                @Override
-                public void onDataChange( @NonNull DataSnapshot dataSnapshot ) {
-                    dataSnapshot.getRef().setValue( jobLead ).addOnSuccessListener( new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Log.d( DEBUG_TAG, "updated job lead at: " + position + "(" + jobLead.getCompanyName() + ")" );
-                            Toast.makeText(getApplicationContext(), "Job lead updated for " + jobLead.getCompanyName(),
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
+                        listView.post( new Runnable() {
+                            @Override
+                            public void run() {
+                                listView.smoothScrollToPosition( shoppingItemList.size()-1 );
+                            }
+                        } );
 
-                @Override
-                public void onCancelled( @NonNull DatabaseError databaseError ) {
-                    Log.d( DEBUG_TAG, "failed to update job lead at: " + position + "(" + jobLead.getCompanyName() + ")" );
-                    Toast.makeText(getApplicationContext(), "Failed to update " + jobLead.getCompanyName(),
-                            Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-        else if( action == EditJobLeadDialogFragment.DELETE ) {
-            Log.d( DEBUG_TAG, "Deleting job lead at: " + position + "(" + jobLead.getCompanyName() + ")" );
-
-            // remove the deleted job lead from the list (internal list in the App)
-            jobLeadsList.remove( position );
-
-            // Update the recycler view to remove the deleted job lead from that view
-            recyclerAdapter.notifyItemRemoved( position );
-
-            // Delete this job lead in Firebase.
-            // Note that we are using a specific key (one child in the list)
-            DatabaseReference ref = database
-                    .getReference()
-                    .child( "jobleads" )
-                    .child( jobLead.getKey() );
-
-            // This listener will be invoked asynchronously, hence no need for an AsyncTask class, as in the previous apps
-            // to maintain job leads.
-            ref.addListenerForSingleValueEvent( new ValueEventListener() {
-                @Override
-                public void onDataChange( @NonNull DataSnapshot dataSnapshot ) {
-                    dataSnapshot.getRef().removeValue().addOnSuccessListener( new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Log.d( DEBUG_TAG, "deleted job lead at: " + position + "(" + jobLead.getCompanyName() + ")" );
-                            Toast.makeText(getApplicationContext(), "Job lead deleted for " + jobLead.getCompanyName(),
-                                    Toast.LENGTH_SHORT).show();                        }
-                    });
-                }
-
-                @Override
-                public void onCancelled( @NonNull DatabaseError databaseError ) {
-                    Log.d( DEBUG_TAG, "failed to delete job lead at: " + position + "(" + jobLead.getCompanyName() + ")" );
-                    Toast.makeText(getApplicationContext(), "Failed to delete " + jobLead.getCompanyName(),
-                            Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-    }*/
+                        Log.d( TAG, "Added to basket: " + shoppingItem );
+                        // Show a quick confirmation
+                        Toast.makeText(getActivity().getApplicationContext(), "Added " + shoppingItem.getItem() + " to shopping basket",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener( new OnFailureListener() {
+                    @Override
+                    public void onFailure( @NonNull Exception e ) {
+                        Toast.makeText( getActivity().getApplicationContext(), "Failed to add " + shoppingItem.getItem() + " to basket",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+        database.getReference("shoppinglist").child(shoppingItem.getItem()).removeValue();
+    }
 }

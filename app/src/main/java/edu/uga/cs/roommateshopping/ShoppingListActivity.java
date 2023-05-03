@@ -14,11 +14,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
 /**
- * activity to load details fragment
+ * activity to load shopping list
  */
 public class ShoppingListActivity extends AppCompatActivity {
     // a TAG to identify logcat events
-    private static final String TAG = "CountryVersions";
+    private static final String TAG = "ShoppingListActivity";
 
     /*
      * override onCreate

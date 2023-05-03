@@ -4,18 +4,39 @@ import java.io.Serializable;
 
 public class BuyItem implements Serializable {
 
-    private long cid;
+    private String key;
     private String item;
+
     private double price;
-    private int quantity;
+    private int amount;
+    private String buyer;
+
+    /*
+     * public empty constructor for firebase
+     */
+    public BuyItem() {}
 
     /*
      * public constructor to instantiate item and score and details
      */
-    public BuyItem(String item, double price, int quantity) {
+    public BuyItem(String item, int amount, double price) {
         this.item = item;
+        this.amount = amount;
         this.price = price;
-        this.quantity = quantity;
+    }
+
+    /*
+     * key getter
+     */
+    public String getKey() {
+        return key;
+    }
+
+    /*
+     * key setter
+     */
+    public void setKey(String key) {
+        this.key = key;
     }
 
     /*
@@ -29,7 +50,7 @@ public class BuyItem implements Serializable {
     /*
      * item setter
      */
-    public void setItem(String Item)
+    public void setItem(String item)
     {
         this.item = item;
     }
@@ -37,48 +58,46 @@ public class BuyItem implements Serializable {
     /*
      * amount getter
      */
-    public double getPrice()
+    public int getAmount()
     {
-        return price;
+        return amount;
     }
 
     /*
      * amount setter
+     */
+    public void setAmount(int amount)
+    {
+        this.amount = amount;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    /*
+     * price setter
      */
     public void setPrice(double price)
     {
         this.price = price;
     }
-
-    public int getQuantity() {
-        return quantity;
+    public String getBuyer() {
+        return buyer;
     }
+
     /*
-     * amount setter
+     * price setter
      */
-    public void setQuantity(int quantity)
+    public void setBuyer(String buyer)
     {
-        this.quantity = quantity;
+        this.buyer = buyer;
     }
 
     /*
      * toString override
      */
     public String toString() {
-        return "Item: " + item + "\nAmount: " + price + "\nDetails: " + quantity;
-    }
-
-    /*
-     * cid getter
-     */
-    public long getCid() {
-        return cid;
-    }
-
-    /*
-     * cid setter
-     */
-    public void setCid(long cid) {
-        this.cid = cid;
+        return "Item: " + item + "\nAmount: " + amount + "\nDetails: " + price;
     }
 }

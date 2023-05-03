@@ -5,10 +5,12 @@
     android:layout_height="match_parent"
     tools:context=".DefaultFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:gravity="center"
+        android:text="Roommate Shopping App"
+        android:textAlignment="center"
+        android:textSize="25sp" />
 
 </FrameLayout>

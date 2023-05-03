@@ -10,11 +10,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 
 /**
- * activity to load details fragment
+ * activity for shopping basket
  */
 public class ShoppingBasketActivity extends AppCompatActivity {
-    // a TAG to identify logcat events
-    private static final String TAG = "CountryVersions";
+    private static final String TAG = "ShoppingBasketActivity";
 
     /*
      * override onCreate

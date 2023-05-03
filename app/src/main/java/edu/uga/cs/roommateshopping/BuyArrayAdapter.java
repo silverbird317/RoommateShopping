@@ -11,13 +11,20 @@ import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
 import java.util.ArrayList;
 import java.util.List;
 
-// this class is a custom ArrayAdapter, holding QuizResults
+/*
+ * this class is a custom ArrayAdapter, holding BuyItems
+ */
 public class BuyArrayAdapter extends ArrayAdapter<BuyItem> {
 
-    public static final String DEBUG_TAG = "QuizResultArrayAdapter";
+    public static final String DEBUG_TAG = "BuyArrayAdapter";
 
     private final Context context;
     private List<BuyItem> values;
@@ -26,46 +33,51 @@ public class BuyArrayAdapter extends ArrayAdapter<BuyItem> {
     /*
      * public constructor
      */
-    public BuyArrayAdapter(Context context, List<BuyItem> values) {
+    public BuyArrayAdapter(Context context, ArrayList<BuyItem> values) {
         super(context, 0, new ArrayList<BuyItem>( values ));
         this.context = context;
-        this.values = new ArrayList<BuyItem>( values );
-        this.originalValues = new ArrayList<BuyItem>( values );
-        Log.d( DEBUG_TAG, "JobLeadArrayAdapter.values: object: " + values );
-        Log.d( DEBUG_TAG, "JobLeadArrayAdapter.originalValues: object: " + originalValues );
+        this.values = values;
+        this.originalValues = new ArrayList<>( values );
+        Log.d( DEBUG_TAG, "BuyArrayAdapter.values: object: " + values );
+        Log.d( DEBUG_TAG, "BuyArrayAdapter.originalValues: object: " + originalValues );
     }
 
     /*
-     * this overridden method creates a single item's view, to be used in a ListView.
-     * position is supplied by Android and indicates which item on the list should be rendered.
+     * creates the view of one item
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Log.d( DEBUG_TAG, "JobLeadArrayAdapter.getView: position: " + position );
-        Log.d( DEBUG_TAG, "JobLeadArrayAdapter.getView: values size: " + values.size() );
+        Log.d( DEBUG_TAG, "BuyArrayAdapter.getView: position: " + position );
+        Log.d( DEBUG_TAG, "BuyArrayAdapter.getView: values size: " + values.size() );
 
         LayoutInflater inflater =
                 (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View itemView = inflater.inflate(R.layout.shopping_item, parent, false);
+        View itemView = inflater.inflate(R.layout.bought_item, parent, false);
 
-        BuyItem shoppingItem = values.get( position );
+        BuyItem buyItem = values.get( position );
 
         TextView item = itemView.findViewById(R.id.item);
         TextView amount = itemView.findViewById(R.id.amount);
-        TextView details = itemView.findViewById(R.id.details);
+        TextView price = itemView.findViewById(R.id.details);
+        TextView buyer = itemView.findViewById(R.id.buyer);
 
-        item.setText(shoppingItem.getItem());
-        amount.setText("" + shoppingItem.getPrice());
-        details.setText("" + shoppingItem.getQuantity());
+        item.setText(buyItem.getItem());
+        amount.setText("" + buyItem.getAmount());
+        price.setText("" + buyItem.getPrice());
+        buyer.setText(buyItem.getBuyer());
 
         Button delete = itemView.findViewById(R.id.button);
-        CheckBox checkBox = itemView.findViewById(R.id.checkBox);
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("checkout");
 
         delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(DEBUG_TAG, "Deleting item");
-                //values.remove(position);
+                AlreadyBoughtListFragment.balance -= buyItem.getPrice();
+                AlreadyBoughtListFragment.money.setText("Your total balance is " + AlreadyBoughtListFragment.balance);
+                myRef.child(buyItem.getItem()).removeValue();
             }
         });
 

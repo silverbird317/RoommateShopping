@@ -17,10 +17,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
-// this class is a custom ArrayAdapter, holding ShoppingItems
-public class ListArrayAdapter extends ArrayAdapter<ShoppingItem> {
+// this class is a custom ArrayAdapter, holding ShoppingItmes
+public class ShoppingBasketArrayAdapter extends ArrayAdapter<ShoppingItem> {
 
-    public static final String DEBUG_TAG = "ListArrayAdapter";
+    public static final String DEBUG_TAG = "ShoppingBasketAdapter";
 
     private final Context context;
     private List<ShoppingItem> values;
@@ -29,23 +29,22 @@ public class ListArrayAdapter extends ArrayAdapter<ShoppingItem> {
     /*
      * public constructor
      */
-    public ListArrayAdapter(Context context, ArrayList<ShoppingItem> values) {
+    public ShoppingBasketArrayAdapter(Context context, ArrayList<ShoppingItem> values) {
         super(context, 0, new ArrayList<ShoppingItem>( values ));
         this.context = context;
         this.values = values;
         this.originalValues = new ArrayList<ShoppingItem>( values );
-        Log.d( DEBUG_TAG, "ListArrayAdapter.values: object: " + values );
-        Log.d( DEBUG_TAG, "ListArrayAdapter.originalValues: object: " + originalValues );
+        Log.d( DEBUG_TAG, "ShoppingBasketAdapter.values: object: " + values );
+        Log.d( DEBUG_TAG, "ShoppingBasketAdapter.originalValues: object: " + originalValues );
     }
 
     /*
-     * this overridden method creates a single item's view, to be used in a ListView.
-     * position is supplied by Android and indicates which item on the list should be rendered.
+     * creates a single instance of shopping item
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Log.d( DEBUG_TAG, "ListArrayAdapter.getView: position: " + position );
-        Log.d( DEBUG_TAG, "ListArrayAdapter.getView: values size: " + values.size() );
+        Log.d( DEBUG_TAG, "ShoppingBasketAdapter.getView: position: " + position );
+        Log.d( DEBUG_TAG, "ShoppingBasketAdapter.getView: values size: " + values.size() );
 
         LayoutInflater inflater =
                 (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -68,15 +67,15 @@ public class ListArrayAdapter extends ArrayAdapter<ShoppingItem> {
             public void onClick(View view) {
                 Log.d("check", "checked");
                 if (checkBox.isChecked()) {
-                    ShoppingListFragment.toShoppingBasket.add(shoppingItem);
+                    ShoppingBasketFragment.checkoutList.add(shoppingItem);
                 } else {
-                    ShoppingListFragment.toShoppingBasket.remove(shoppingItem);
+                    ShoppingBasketFragment.checkoutList.remove(shoppingItem);
                 }
             }
         });
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("shoppinglist");
+        DatabaseReference myRef = database.getReference("shoppingbasket");
 
         delete.setOnClickListener(new View.OnClickListener() {
             @Override

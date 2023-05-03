@@ -36,18 +36,11 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 /**
- * A fragment representing a list of Items.
+ * A fragment for first enter app
  */
 public class DefaultFragment extends Fragment {
 
-    private static final String TAG = "ResultsHistoryFragment";
-
-    private ListView listView;
-
-    //private QuizHistoryData quizHistoryData = null;
-    private List<ShoppingItem> quizResultList;
-    ListArrayAdapter itemsAdapter;
-    private int versionNum;
+    private static final String TAG = "DefaultFragment";
 
     /*
      * required empty public constructor
@@ -84,10 +77,9 @@ public class DefaultFragment extends Fragment {
     }
 
     /*
-     * overrides onresume, loads quiz results back
+     * overrides onresume
      */
     public void onResume() {
-        //Log.d( TAG, "Flow2_A.onResume()"  );
         super.onResume();
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( getResources().getString( R.string.app_name ) );
     }

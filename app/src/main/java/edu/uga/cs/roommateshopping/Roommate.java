@@ -2,15 +2,23 @@ package edu.uga.cs.roommateshopping;
 
 import java.io.Serializable;
 
+/*
+ * class to hold roommate object
+ */
 public class Roommate implements Serializable {
 
-    private long cid;
+    private String key;
     private String name;
     private String email;
     private String phone;
 
     /*
-     * public constructor to instantiate name and score and phone
+     * empty constructor for firebase
+     */
+    public Roommate() {}
+
+    /*
+     * public constructor to instantiate name and email and phone
      */
     public Roommate(String name, String email, String phone) {
         this.name = name;
@@ -50,11 +58,14 @@ public class Roommate implements Serializable {
         this.email = email;
     }
 
+    /*
+     * phone getter
+     */
     public String getPhone() {
         return phone;
     }
     /*
-     * email setter
+     * phone setter
      */
     public void setPhone(String phone)
     {
@@ -69,16 +80,16 @@ public class Roommate implements Serializable {
     }
 
     /*
-     * cid getter
+     * key getter
      */
-    public long getCid() {
-        return cid;
+    public String getKey() {
+        return key;
     }
 
     /*
-     * cid setter
+     * key setter
      */
-    public void setCid(long cid) {
-        this.cid = cid;
+    public void setKey(String key) {
+        this.key = key;
     }
 }

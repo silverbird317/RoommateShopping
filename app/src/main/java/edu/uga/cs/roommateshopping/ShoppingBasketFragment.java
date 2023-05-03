@@ -6,7 +6,9 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,6 +27,16 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,7 +48,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 /**
- * A fragment representing a list of Items.
+ * A fragment representing a shoppingbasket
  */
 public class ShoppingBasketFragment extends Fragment {
 
@@ -47,9 +59,12 @@ public class ShoppingBasketFragment extends Fragment {
     public static final String ARG_OBJECT = "object";
 
     //private QuizHistoryData quizHistoryData = null;
-    private ArrayList<ShoppingItem> quizResultList;
-    ListArrayAdapter itemsAdapter;
+    private ArrayList<ShoppingItem> basketList = new ArrayList<ShoppingItem>();
+    ShoppingBasketArrayAdapter itemsAdapter;
     private int versionNum;
+
+    private FirebaseDatabase database;
+    public static ArrayList<ShoppingItem> checkoutList = new ArrayList<>();
 
     /*
      * required empty public constructor
@@ -66,9 +81,9 @@ public class ShoppingBasketFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    public static ShoppingListFragment newInstance() {
+    public static ShoppingBasketFragment newInstance() {
 
-        ShoppingListFragment fragment = new ShoppingListFragment();
+        ShoppingBasketFragment fragment = new ShoppingBasketFragment();
 
         Bundle args = new Bundle();
         //args.putInt( "index", index );
@@ -84,7 +99,7 @@ public class ShoppingBasketFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_shopping_list, container, false);
+        return inflater.inflate(R.layout.fragment_shopping_basket, container, false);
     }
 
     /*
@@ -96,16 +111,52 @@ public class ShoppingBasketFragment extends Fragment {
         super.onViewCreated( view, savedInstanceState );
 
         listView = getView().findViewById(R.id.listView);
-        //quizHistoryData = new QuizHistoryData(getActivity());
-        quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
-        quizResultList.add(new ShoppingItem("Ducky", 3, "ga"));
-        quizResultList.add(new ShoppingItem("Candy", 200, "yummy"));
-        quizResultList.add(new ShoppingItem("Ga", 3, "7"));
-        itemsAdapter = new ListArrayAdapter( getActivity(), quizResultList );
 
-        // set headers
-        //TextView titleView = view.findViewById( R.id.questionNum );
-        //TextView question = view.findViewById( R.id.question );
+        itemsAdapter = new ShoppingBasketArrayAdapter( getActivity(), basketList );
+
+        Button checkout = getView().findViewById(R.id.checkout);
+        checkout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                for (ShoppingItem item : checkoutList) {
+                    checkoutItem(item);
+                }
+                checkoutList.clear();
+            }
+        });
+
+
+        // initialize the list
+        listView.setAdapter( itemsAdapter );
+
+        // get a Firebase DB instance reference
+        database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("shoppingbasket");
+
+        myRef.addValueEventListener( new ValueEventListener() {
+
+            @Override
+            public void onDataChange( @NonNull DataSnapshot snapshot ) {
+                basketList.clear(); // clear the current content; this is inefficient!
+                for (DataSnapshot postSnapshot : snapshot.getChildren()) {
+                    ShoppingItem shoppingItem = postSnapshot.getValue(ShoppingItem.class);
+                    shoppingItem.setKey(postSnapshot.getKey());
+                    Log.d("firebase", "changed: " + shoppingItem);
+                    basketList.add(shoppingItem);
+                    Log.d(TAG, "ValueEventListener: added: " + shoppingItem);
+                    Log.d(TAG, "ValueEventListener: key: " + postSnapshot.getKey());
+                }
+                Log.d("new quiz", "" + basketList.size());
+                itemsAdapter.clear();
+                itemsAdapter.addAll(basketList);
+                itemsAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled( @NonNull DatabaseError databaseError ) {
+                System.out.println( "ValueEventListener: reading failed: " + databaseError.getMessage() );
+            }
+        } );
 
     }
 
@@ -113,22 +164,97 @@ public class ShoppingBasketFragment extends Fragment {
      * overrides onresume, loads quiz results back
      */
     public void onResume() {
-        //Log.d( TAG, "Flow2_A.onResume()"  );
         super.onResume();
-        //if( quizHistoryData != null ) {
-        //  quizHistoryData.open();
-        //quizHistoryData.restorelJobLeads();
-        quizResultList = new ArrayList<ShoppingItem>(); //QuizHistoryData.quizHistory;
-        //quizHistoryData.retrieveQuizResults();
-        quizResultList.add(new ShoppingItem("Ducky", 3, "gaya"));
-        quizResultList.add(new ShoppingItem("Candy", 200, "chocolate"));
-        quizResultList.add(new ShoppingItem("Ga", 3, "ya"));
+        Log.d( TAG, "ShoppingBasketFragment.onResume(): length: " + basketList.size() );
 
-        Log.d( TAG, "ReviewJobLeadsFragment.onResume(): length: " + quizResultList.size() );
+        getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
+                Log.d("receive", "gua");
+                String item = bundle.getString("item");
+                int amount = bundle.getInt("amount");
+                double price = bundle.getDouble("price");
+                ShoppingItem shoppingItem = new ShoppingItem(item, amount, price);
+                addBasketItem(shoppingItem);
+            }
+        });
 
-        itemsAdapter = new ListArrayAdapter(getActivity(), quizResultList );
-        listView.setAdapter(itemsAdapter);
-        //}
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( getResources().getString( R.string.app_name ) );
+    }
+
+    /*
+     * adds item to shoppingbasket database
+     */
+    public void addBasketItem(ShoppingItem shoppingItem) {
+        Log.d("addBasket", "added");
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("shoppingbasket").child(shoppingItem.getItem());
+
+        myRef.setValue( shoppingItem )
+                .addOnSuccessListener( new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+
+                        listView.post( new Runnable() {
+                            @Override
+                            public void run() {
+                                listView.smoothScrollToPosition( basketList.size()-1 );
+                            }
+                        } );
+
+                        Log.d( TAG, "Item saved: " + shoppingItem );
+                        // Show a quick confirmation
+                        Toast.makeText(getActivity().getApplicationContext(), "Item created for " + shoppingItem.getItem(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener( new OnFailureListener() {
+                    @Override
+                    public void onFailure( @NonNull Exception e ) {
+                        Toast.makeText( getActivity().getApplicationContext(), "Failed to create a item for " + shoppingItem.getItem(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    /*
+     * add the item to checkout database and remove from basket database
+     */
+    public void checkoutItem(ShoppingItem shoppingItem) {
+        Log.d("checkoutItem", "added");
+
+        BuyItem buyItem = new BuyItem(shoppingItem.getItem(), shoppingItem.getAmount(), shoppingItem.getPrice());
+        buyItem.setBuyer(MainActivity.email);
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("checkout").child(shoppingItem.getItem());
+
+        myRef.setValue( buyItem )
+                .addOnSuccessListener( new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+
+                        listView.post( new Runnable() {
+                            @Override
+                            public void run() {
+                                listView.smoothScrollToPosition( basketList.size()-1 );
+                            }
+                        } );
+
+                        Log.d( TAG, "Checked out: " + buyItem );
+                        // Show a quick confirmation
+                        Toast.makeText(getActivity().getApplicationContext(), "Checked out: " + buyItem.getItem(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener( new OnFailureListener() {
+                    @Override
+                    public void onFailure( @NonNull Exception e ) {
+                        Toast.makeText( getActivity().getApplicationContext(), "Failed to checkout " + buyItem.getItem(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+        database.getReference("shoppingbasket").child(shoppingItem.getItem()).removeValue();
     }
 }

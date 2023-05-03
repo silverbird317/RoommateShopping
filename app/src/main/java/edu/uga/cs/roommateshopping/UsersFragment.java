@@ -1,11 +1,13 @@
 package edu.uga.cs.roommateshopping;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,6 +28,12 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,18 +44,12 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 
 /**
- * A fragment representing a list of Items.
+ * A fragment representing a user menu.
  */
 public class UsersFragment extends Fragment {
 
-    private static final String TAG = "ResultsHistoryFragment";
+    private static final String TAG = "UsersFragment";
 
-    private ListView listView;
-
-    //private QuizHistoryData quizHistoryData = null;
-    private List<Roommate> quizResultList;
-    RoommatesArrayAdapter itemsAdapter;
-    private int versionNum;
 
     /*
      * required empty public constructor
@@ -71,7 +73,7 @@ public class UsersFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_shopping_list, container, false);
+        return inflater.inflate(R.layout.fragment_users, container, false);
     }
 
     /*
@@ -82,40 +84,19 @@ public class UsersFragment extends Fragment {
         //public void onActivityCreated(Bundle savedInstanceState) {
         super.onViewCreated( view, savedInstanceState );
 
-        listView = getView().findViewById(R.id.listView);
-        //quizHistoryData = new QuizHistoryData(getActivity());
-        quizResultList = new ArrayList<Roommate>(); //QuizHistoryData.quizHistory;
-        quizResultList.add(new Roommate("Mumu", "mumu@gmail.com", "1112223333"));
-        quizResultList.add(new Roommate("Paco", "paco@gmail.com", "4445556666"));
-        quizResultList.add(new Roommate("Gaga", "gaga@gmail.com", "7778889999"));
-        itemsAdapter = new RoommatesArrayAdapter( getActivity(), quizResultList );
-
-        // set headers
-        //TextView titleView = view.findViewById( R.id.questionNum );
-        //TextView question = view.findViewById( R.id.question );
-
-    }
-
-    /*
-     * overrides onresume, loads quiz results back
-     */
-    public void onResume() {
-        //Log.d( TAG, "Flow2_A.onResume()"  );
-        super.onResume();
-        //if( quizHistoryData != null ) {
-        //  quizHistoryData.open();
-        //quizHistoryData.restorelJobLeads();
-        quizResultList = new ArrayList<Roommate>(); //QuizHistoryData.quizHistory;
-        //quizHistoryData.retrieveQuizResults();
-        quizResultList.add(new Roommate("Mumu", "mumu@gmail.com", "1112223333"));
-        quizResultList.add(new Roommate("Paco", "paco@gmail.com", "4445556666"));
-        quizResultList.add(new Roommate("Gaga", "gaga@gmail.com", "7778889999"));
-
-        Log.d( TAG, "ReviewJobLeadsFragment.onResume(): length: " + quizResultList.size() );
-
-        itemsAdapter = new RoommatesArrayAdapter(getActivity(), quizResultList );
-        listView.setAdapter(itemsAdapter);
-        //}
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( getResources().getString( R.string.app_name ) );
+        Button logoutButton = getView().findViewById(R.id.button);
+        logoutButton.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AuthUI.getInstance()
+                        .signOut(getView().getContext())
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            public void onComplete(@NonNull Task<Void> task) {
+                                // user is now signed out
+                                startActivity(new Intent(getActivity(), StartActivity.class));
+                            }
+                        });
+                }
+            });
     }
 }

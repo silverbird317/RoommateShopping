@@ -2,28 +2,41 @@ package edu.uga.cs.roommateshopping;
 
 import java.io.Serializable;
 
+/*
+ * class that holds info from shopping item
+ */
 public class ShoppingItem implements Serializable {
 
     private String key;
     private String item;
-    private int amount;
-    private String details;
 
+    private double price;
+    private int amount;
+
+    /*
+     * empty constructor fo firebase
+     */
     public ShoppingItem() {}
 
     /*
      * public constructor to instantiate item and score and details
      */
-    public ShoppingItem(String item, int amount, String details) {
+    public ShoppingItem(String item, int amount, double price) {
         this.item = item;
         this.amount = amount;
-        this.details = details;
+        this.price = price;
     }
 
+    /*
+     * key getter
+     */
     public String getKey() {
         return key;
     }
 
+    /*
+     * key setter
+     */
     public void setKey(String key) {
         this.key = key;
     }
@@ -60,21 +73,25 @@ public class ShoppingItem implements Serializable {
         this.amount = amount;
     }
 
-    public String getDetails() {
-        return details;
-    }
     /*
-     * amount setter
+     * price getter
      */
-    public void setDetails(String details)
+    public double getPrice() {
+        return price;
+    }
+
+    /*
+     * price setter
+     */
+    public void setPrice(double price)
     {
-        this.details = details;
+        this.price = price;
     }
 
     /*
      * toString override
      */
     public String toString() {
-        return "Item: " + item + "\nAmount: " + amount + "\nDetails: " + details;
+        return "Item: " + item + "\nAmount: " + amount + "\nDetails: " + price;
     }
 }

@@ -6,7 +6,9 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,6 +27,16 @@ import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,16 +52,19 @@ import java.util.Random;
  */
 public class AlreadyBoughtListFragment extends Fragment {
 
-    private static final String TAG = "ResultsHistoryFragment";
+    private static final String TAG = "AlreadyBoughtList";
 
     private ListView listView;
 
     public static final String ARG_OBJECT = "object";
+    public static double balance = 0.0;
+    public static TextView money;
 
     //private QuizHistoryData quizHistoryData = null;
-    private List<BuyItem> quizResultList;
+    private ArrayList<BuyItem> alreadyBoughtList = new ArrayList<BuyItem>();
     BuyArrayAdapter itemsAdapter;
-    private int versionNum;
+
+    private FirebaseDatabase database;
 
     /*
      * required empty public constructor
@@ -66,6 +81,9 @@ public class AlreadyBoughtListFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    /*
+     * creates new instance of fragment
+     */
     public static AlreadyBoughtListFragment newInstance() {
 
         AlreadyBoughtListFragment fragment = new AlreadyBoughtListFragment();
@@ -96,16 +114,47 @@ public class AlreadyBoughtListFragment extends Fragment {
         super.onViewCreated( view, savedInstanceState );
 
         listView = getView().findViewById(R.id.listView);
-        //quizHistoryData = new QuizHistoryData(getActivity());
-        quizResultList = new ArrayList<BuyItem>(); //QuizHistoryData.quizHistory;
-        quizResultList.add(new BuyItem("Ducky", 3.99, 3));
-        quizResultList.add(new BuyItem("Candy", 12.99, 200));
-        quizResultList.add(new BuyItem("Ga", 0.25, 3));
-        itemsAdapter = new BuyArrayAdapter( getActivity(), quizResultList );
 
-        // set headers
-        //TextView titleView = view.findViewById( R.id.questionNum );
-        //TextView question = view.findViewById( R.id.question );
+        itemsAdapter = new BuyArrayAdapter( getActivity(), alreadyBoughtList );
+
+        money = getView().findViewById(R.id.textView);
+        money.setText("Your total balance is " + balance);
+
+
+        // initialize the list
+        listView.setAdapter( itemsAdapter );
+
+        // get a Firebase DB instance reference
+        database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("checkout");
+
+        myRef.addValueEventListener( new ValueEventListener() {
+
+            @Override
+            public void onDataChange( @NonNull DataSnapshot snapshot ) {
+                alreadyBoughtList.clear();
+                balance = 0;
+                for (DataSnapshot postSnapshot : snapshot.getChildren()) {
+                    BuyItem buyItem = postSnapshot.getValue(BuyItem.class);
+                    buyItem.setKey(postSnapshot.getKey());
+                    Log.d("afirebase", "changed: " + buyItem);
+                    alreadyBoughtList.add(buyItem);
+                    balance += buyItem.getPrice();
+                    money.setText("Your total balance is " + balance);
+                    Log.d(TAG, "ValueEventListener: added: " + buyItem);
+                    Log.d(TAG, "ValueEventListener: key: " + postSnapshot.getKey());
+                }
+                Log.d("new list", "" + alreadyBoughtList.size());
+                itemsAdapter.clear();
+                itemsAdapter.addAll(alreadyBoughtList);
+                itemsAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled( @NonNull DatabaseError databaseError ) {
+                System.out.println( "ValueEventListener: reading failed: " + databaseError.getMessage() );
+            }
+        } );
 
     }
 
@@ -113,22 +162,57 @@ public class AlreadyBoughtListFragment extends Fragment {
      * overrides onresume, loads quiz results back
      */
     public void onResume() {
-        //Log.d( TAG, "Flow2_A.onResume()"  );
         super.onResume();
-        //if( quizHistoryData != null ) {
-        //  quizHistoryData.open();
-        //quizHistoryData.restorelJobLeads();
-        quizResultList = new ArrayList<BuyItem>(); //QuizHistoryData.quizHistory;
-        //quizHistoryData.retrieveQuizResults();
-        quizResultList.add(new BuyItem("Ducky", 1.99, 3));
-        quizResultList.add(new BuyItem("Candy", 3.24, 200));
-        quizResultList.add(new BuyItem("Ga", 100, 3));
+        Log.d( TAG, "AlreadyBoughtListFragment.onResume(): length: " + alreadyBoughtList.size() );
 
-        Log.d( TAG, "ReviewJobLeadsFragment.onResume(): length: " + quizResultList.size() );
+        getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
+                Log.d("receive", "gua");
+                String item = bundle.getString("item");
+                int amount = bundle.getInt("amount");
+                double price = bundle.getDouble("price");
+                ShoppingItem shoppingItem = new ShoppingItem(item, amount, price);
+                addToCheckout(shoppingItem);
+            }
+        });
 
-        itemsAdapter = new BuyArrayAdapter(getActivity(), quizResultList );
-        listView.setAdapter(itemsAdapter);
-        //}
         ((AppCompatActivity) getActivity()).getSupportActionBar().setTitle( getResources().getString( R.string.app_name ) );
+    }
+
+    /*
+     * adds bought item to checkout database
+     */
+    public void addToCheckout(ShoppingItem shoppingItem) {
+        Log.d("addPurchasedItem", "added");
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("checkout").child(shoppingItem.getItem());
+
+        myRef.setValue( shoppingItem )
+                .addOnSuccessListener( new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+
+                        listView.post( new Runnable() {
+                            @Override
+                            public void run() {
+                                listView.smoothScrollToPosition( alreadyBoughtList.size()-1 );
+                            }
+                        } );
+
+                        Log.d( TAG, "Item saved: " + shoppingItem );
+                        // Show a quick confirmation
+                        Toast.makeText(getActivity().getApplicationContext(), "Item created for " + shoppingItem.getItem(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener( new OnFailureListener() {
+                    @Override
+                    public void onFailure( @NonNull Exception e ) {
+                        Toast.makeText( getActivity().getApplicationContext(), "Failed to create item for " + shoppingItem.getItem(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }

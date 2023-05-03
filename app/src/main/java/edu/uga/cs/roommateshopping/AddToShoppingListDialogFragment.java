@@ -15,21 +15,18 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
-// A DialogFragment class to handle job lead additions from the job lead review activity
-// It uses a DialogFragment to allow the input of a new job lead.
+/*
+ * DialogFragment to ask use to enter new shopping item
+ */
 public class AddToShoppingListDialogFragment extends DialogFragment {
 
     private EditText itemView;
     private EditText amountView;
-    private EditText detailsView;
+    private EditText priceView;
 
-    // This interface will be used to obtain the new job lead from an AlertDialog.
-    // A class implementing this interface will handle the new job lead, i.e. store it
-    // in Firebase and add it to the RecyclerAdapter.
-    public interface AddToShoppingListDialogListener {
-        void addJobLead(ShoppingItem shoppingItem);
-    }
-
+    /*
+     * overrides onCreateDialog, sets up components in alert dialog xml
+     */
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -42,7 +39,7 @@ public class AddToShoppingListDialogFragment extends DialogFragment {
         // get the view objects in the AlertDialog
         itemView = layout.findViewById( R.id.editText1 );
         amountView = layout.findViewById( R.id.editText2 );
-        detailsView = layout.findViewById( R.id.editText3 );
+        priceView = layout.findViewById( R.id.editText3 );
 
         // create a new AlertDialog
         AlertDialog.Builder builder = new AlertDialog.Builder( getActivity() );
@@ -52,7 +49,7 @@ public class AddToShoppingListDialogFragment extends DialogFragment {
 
 
         // Set the title of the AlertDialog
-        builder.setTitle( "New Job Lead" );
+        builder.setTitle( "New Shopping Item" );
         // Provide the negative button listener
         builder.setNegativeButton( android.R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
@@ -62,41 +59,27 @@ public class AddToShoppingListDialogFragment extends DialogFragment {
             }
         });
         // Provide the positive button listener
-        builder.setPositiveButton( android.R.string.ok, new AddJobLeadListener() );
+        builder.setPositiveButton( android.R.string.ok, new AddItemListener() );
 
         // Create the AlertDialog and show it
         return builder.create();
     }
 
-    private class AddJobLeadListener implements DialogInterface.OnClickListener {
+    /*
+     * listener to pass information to fragment
+     */
+    private class AddItemListener implements DialogInterface.OnClickListener {
+        /*
+         * button onclick override
+         */
         @Override
         public void onClick(DialogInterface dialog, int which) {
             Bundle result = new Bundle();
             //result.putString("bundleKey", "result");
             result.putString("item", itemView.getText().toString());
             result.putInt("amount", Integer.parseInt(amountView.getText().toString()));
-            result.putString("details", detailsView.getText().toString());
+            result.putDouble("price", Double.parseDouble(priceView.getText().toString()));
             getParentFragmentManager().setFragmentResult("requestKey", result);
         }
-        /*@Override
-        public void onClick(DialogInterface dialog, int which) {
-            // get the new job lead data from the user
-            String item = itemView.getText().toString();
-            int amount = Integer.parseInt(amountView.getText().toString());
-            String details = detailsView.getText().toString();
-
-            // create a new JobLead object
-            ShoppingItem shoppingItem = new ShoppingItem( item, amount, details );
-
-            // get the Activity's listener to add the new job lead
-            AddToShoppingListDialogListener listener = (AddToShoppingListDialogListener) getActivity();//.
-                    //getSupportFragmentManager().findFragmentByTag("ShoppingFragment").getChildFragmentManager().findFragmentByTag("f0");
-
-            // add the new job lead
-            listener.addJobLead( shoppingItem );
-
-            // close the dialog
-            dismiss();
-        }*/
     }
 }
